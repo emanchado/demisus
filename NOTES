@@ -1,0 +1,59 @@
+Detective Mike's Sudoku Solver
+==============================
+
+Lookup the jargon on the internet.
+
+class SudokuSolver
+  # Needs event listeners for removing candidates and for assigning numbers to
+  # cells. Some kind of on_candidate_removal and on_number_assignment
+
+  def self.define_rule  # presumably in different file(s), opening the class
+
+  def initialize(board)
+    # board is an array of arrays of numbers (or nil)
+  end
+
+  def consistent?
+  def solve!
+  def unsolved_cells
+  def simplify!
+
+  private
+
+  def remove_candidate!(row, col)
+  def region_for(row, col)
+end
+
+
+class SudokuBoard
+  attr :cells           # Array of SudokuCell
+  attr :region_size  # Array (pair of integers)
+
+  def initialize(board)
+    # board is an array of arrays of numbers (or nil)
+    # it's converted to AoA of SudokuCell objects
+  end
+end
+
+
+class SudokuCell
+  attr :candidates      # Array
+  attr :number          # Integer
+  attr :coords          # Array (pair of integers)
+end
+
+
+Techniques
+----------
+
+CG = Cell Group. Means it's applicable to a group of cells: it will be applied
+to rows, columns and regions.
+
+R = Region
+
+* One candidate left
+* (CG) Final numbers remove candidates from the group
+* (CG) Exact pair twice removes both candidates from the rest of the group
+* (CG) Candidate only appearing in one cell, that's its place
+* (R) Candidate in only one column or row removes the candidates from that
+  column/row

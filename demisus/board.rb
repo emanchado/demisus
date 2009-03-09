@@ -111,7 +111,10 @@ module Demisus
           "Invalid candidate #{number}, possible are: #{candidates.to_a.join(", ")}"
       end
       @number     = number
-      @candidates = candidates.reject {|c| c == number}
+      @candidates = [number]
+      if number.nil?
+        @candidates = candidates.reject {|c| c == number}
+      end
     end
 
     def solved?

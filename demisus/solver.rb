@@ -111,14 +111,22 @@ module Demisus
     # Executes rules until the first change in the board (candidate removal or
     # number finding)
     def simplify!
+      $stderr.puts "Simplifying by rows"
       @board.each_row do |row|
         rules(:cell_group).each do |rule|
           execute_rule(rule, row)
         end
       end
+      $stderr.puts "Simplifying by columns"
       @board.each_column do |col|
         rules(:cell_group).each do |rule|
           execute_rule(rule, col)
+        end
+      end
+      $stderr.puts "Simplifying by regions"
+      @board.each_region do |region|
+        rules(:cell_group).each do |rule|
+          execute_rule(rule, region)
         end
       end
     end

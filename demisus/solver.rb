@@ -57,6 +57,37 @@ module Demisus
       end
     end
 
+    define_rule(:cell_group,
+                :naked_pairs,
+                "Pair of cells with same candidates discard those for the rest",
+                "A pair of cells having the same pair of candidates as only
+                possibilities discard those candidates from the rest of the
+                row/column/region") do |cells|
+      solved, unsolved = cells.partition {|c| c.solved?}
+      # First, look for a pair of cells having the same pair of candidates
+      candidate_groups_found = {}
+      unsolved.each do |cell|
+        cands = cell.candidates
+        if cands.size == 2
+          key = cands.join("|")
+          candidate_groups_found[key] ||= []
+          candidate_groups_found[key] << cell
+        end
+      end
+      # Now, if found, drop candidates from the rest of the cells
+      candidate_groups_found.each_pair do |serial_cands,found_cells|
+        raise InconsistentSudokuError if found_cells.size > 2
+        next                          if found_cells.size < 2
+        cells.each do |cell|
+          next if found_cells.include? cell
+          cands_to_remove = serial_cands.split("|").map {|i| i.to_i}
+          (cands_to_remove & cell.candidates).each do |cand|
+            cell.remove_candidate(cand)
+          end
+        end
+      end
+    end
+
     # Instance methods =======================================================
 
     # Creates a new solver object for the given board (a matrix of Integer

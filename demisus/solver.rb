@@ -37,14 +37,14 @@ module Demisus
                 "Final numbers remove candidates",
                 "Every final number in a row/column/region automatically
                 removes that number as candidate from the rest of the
-                row/column/region") do |cells, board|
+                row/column/region") do |cells|
       solved, unsolved = cells.partition {|c| c.solved?}
       final_numbers = solved.map {|c| c.number}
       unsolved.each do |cell|
         common = cell.candidates & final_numbers
         if not common.empty?
           common.each do |c|
-            board.remove_candidate(cell.i, cell.j, c)
+            cell.remove_candidate(c)
           end
         end
       end
@@ -105,7 +105,7 @@ module Demisus
     end
 
     def execute_rule(rule, cell_group)
-      rule[:action].call(cell_group, @board)
+      rule[:action].call(cell_group)
     end
 
     # Executes rules until the first change in the board (candidate removal or

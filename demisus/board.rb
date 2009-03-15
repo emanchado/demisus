@@ -86,21 +86,6 @@ module Demisus
       end
     end
 
-    # Sets the number in the given position
-    def set_number(i, j, number)
-      @rows[i][j].number = number
-      call_listeners(:set_number, [i, j, number])
-    end
-
-    # Removes a candidate from the given position
-    def remove_candidate(i, j, candidate)
-      @rows[i][j].remove_candidate(candidate)
-      call_listeners(:remove_candidate, [i, j, candidate])
-    end
-
-
-    private
-
     # Call the defined listeners for the given event, passing the given list of
     # params
     def call_listeners(event, params)
@@ -145,11 +130,13 @@ module Demisus
       @number = new_number
       if new_number
         @candidates = [@number]
+        @board.call_listeners(:set_number, [@i, @j, new_number])
       end
     end
 
     def remove_candidate(candidate)
       if @candidates.include? candidate
+        @board.call_listeners(:remove_candidate, [@i, @j, candidate])
         @candidates.reject! {|c| c == candidate}
 
         case @candidates.length 

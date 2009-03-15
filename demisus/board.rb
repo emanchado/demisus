@@ -2,12 +2,14 @@ module Demisus
   class InvalidCandidateError < ArgumentError; end
   class UnknownEventError < ArgumentError; end
   class InconsistentSudokuError < ArgumentError; end
+  class InvalidSudokuError < ArgumentError; end
 
   class SudokuBoard
     EVENTS = [:set_number, :remove_candidate]
 
     # Array of SudokuCell
-    attr_reader :cells
+    attr_reader :rows
+    attr_reader :columns
     # Array (pair of integers)
     attr_reader :region_size
     # Number of elements per row/column
@@ -18,7 +20,8 @@ module Demisus
     # Array (pair) with the size of the regions (rows x columns)
     def initialize(board, user_opts={})
       opts = {:region_size => [3,3]}.merge(user_opts)
-      @cells       = []
+      @rows        = []
+      @columns     = []
       @region_size = opts[:region_size]
       @side_size   = @region_size[0] * @region_size[1]
       # List of listeners per every event
@@ -26,17 +29,33 @@ module Demisus
       EVENTS.each {|e| @listeners[e] = []}
 
       if board.size != @side_size
-        raise InconsistentSudokuError,
+        raise InvalidSudokuError,
           "Expected #{@side_size} rows, were #{board.size}"
       end
       board.each_with_index do |row, i|
         if row.size != @side_size
-          raise InconsistentSudokuError,
+          raise InvalidSudokuError,
             "Expected #{@side_size} columns for row #{i+1}, were #{row.size}"
         end
-        j = -1
-        @cells.push(row.map {|cell| j += 1; SudokuCell.new(self, i, j, cell)})
+        j = 0
+        @rows[i] = []
+        current_row = @rows[i]
+        row.each do |n|
+          cell = SudokuCell.new(self, i, j, n)
+          current_row.push(cell)
+          @columns[j]    ||= []
+          @columns[j][i]   = cell
+          j += 1
+        end
       end
+    end
+
+    def each_row(&blk)
+      @rows.each &blk
+    end
+
+    def each_column(&blk)
+      @columns.each &blk
     end
 
     # Returns a Range with the possible candidates for the cells inside the
@@ -47,7 +66,7 @@ module Demisus
 
     # Returns the list of unsolved cells
     def unsolved_cells
-      @cells.flatten.find_all {|c| not c.solved? }
+      @rows.flatten.find_all {|c| not c.solved? }
     end
 
     # Returns the list of cells comprising the region containing the given
@@ -69,13 +88,13 @@ module Demisus
 
     # Sets the number in the given position
     def set_number(i, j, number)
-      @cells[i][j].number = number
+      @rows[i][j].number = number
       call_listeners(:set_number, [i, j, number])
     end
 
     # Removes a candidate from the given position
     def remove_candidate(i, j, candidate)
-      @cells[i][j].remove_candidate(candidate)
+      @rows[i][j].remove_candidate(candidate)
       call_listeners(:remove_candidate, [i, j, candidate])
     end
 
@@ -96,7 +115,7 @@ module Demisus
 
   class SudokuCell
     attr_reader :board
-    attr_reader :coords
+    attr_reader :i, :j
     attr_reader :number
     attr_reader :candidates
 
@@ -104,7 +123,8 @@ module Demisus
     # number (or nil, if the cell number is not known yet)
     def initialize(board, i, j, number=nil)
       @board      = board
-      @coords     = [i, j]
+      @i          = i
+      @j          = j
       candidates = board.possible_candidates
       if not number.nil? and not candidates.include? number
         raise InvalidCandidateError,
@@ -129,8 +149,8 @@ module Demisus
     end
 
     def remove_candidate(candidate)
-      if @candidates.include candidate
-        @candidates.reject! candidate
+      if @candidates.include? candidate
+        @candidates.reject! {|c| c == candidate}
 
         case @candidates.length 
         when 0

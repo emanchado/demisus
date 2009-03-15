@@ -1,4 +1,5 @@
 require 'demisus/solver'
+require 'demisus/view/html_exporter'
 
 numbers_consistent = [[nil,nil,9,  nil,nil,7,  5,  2,  nil],
                       [8,  nil,nil,nil,4,  5,  nil,nil,nil],
@@ -12,3 +13,8 @@ numbers_consistent = [[nil,nil,9,  nil,nil,7,  5,  2,  nil],
 solver = Demisus::SudokuSolver.new(numbers_consistent)
 puts "Consistent? #{solver.consistent?}"
 puts "Unsolved cells: #{solver.number_unsolved_cells}"
+
+
+exporter = Demisus::HtmlExporter.new(solver.board)
+
+solver.simplify!

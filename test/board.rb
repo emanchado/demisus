@@ -4,11 +4,12 @@ require 'demisus/board'
 class TestSudokuBoard < Test::Unit::TestCase
   def test_region_size
     numbers32 = [[1,  2,  3,  4,  5,  6  ],
-                 [2,  3,  4,  5,  6,  1  ],
+                 [nil,3,  4,  5,  6,  1  ],
                  [3,  4,  5,  6,  nil,nil],
-                 [4,  5,  6,  2,  1,  3  ],
-                 [4,  5,  6,  nil,2,  1  ],
-                 [4,  5,  6,  nil,1,  2  ]]
+                 [4,  nil,nil,2,  1,  3  ],
+                 [nil,nil,6,  nil,2,  nil],
+                 [nil,5,  nil,nil,nil,2  ]]
+
     numbers33 = [[1,  2,  3,  4,  5,  6,  7,  8,  9  ],
                  [2,  3,  4,  5,  6,  1,  8,  9,  7  ],
                  [3,  4,  5,  6,  nil,nil,nil,7,  2  ],
@@ -22,7 +23,7 @@ class TestSudokuBoard < Test::Unit::TestCase
                                    :region_size => [3,2])
     assert_equal [3,2], b32.region_size
 
-    assert_raises ArgumentError do
+    assert_raises Demisus::InvalidSudokuError do
       Demisus::SudokuBoard.new(numbers32)
     end
 
@@ -33,7 +34,7 @@ class TestSudokuBoard < Test::Unit::TestCase
                                    :region_size => [3,3])
     assert_equal [3,3], b33.region_size
 
-    assert_raises ArgumentError do
+    assert_raises Demisus::InvalidSudokuError do
       Demisus::SudokuBoard.new(numbers33,
                                :region_size => [3,2])
     end
@@ -58,14 +59,40 @@ class TestSudokuBoard < Test::Unit::TestCase
                         [4,  5,  6,  2,  1,  3  ],
                         [4,  5,  6,  nil,2,  1  ],
                         [4,  5,  6,  nil,1,  2  ]]
-    assert_nothing_raised Demisus::InvalidCandidate do
+    assert_nothing_raised Demisus::InvalidCandidateError do
       Demisus::SudokuBoard.new(numbers, :region_size => [3,2])
     end
-    assert_raises Demisus::InvalidCandidate do
+    assert_raises Demisus::InvalidCandidateError do
       Demisus::SudokuBoard.new(numbers_invalid, :region_size => [3,2])
     end
-    assert_raises Demisus::InvalidCandidate do
+    assert_raises Demisus::InvalidCandidateError do
       Demisus::SudokuBoard.new(numbers_invalid2, :region_size => [3,2])
     end
+  end
+
+  def test_each_column
+    numbers = [[1,  2,  3,  4,  5,  6  ],
+               [2,  3,  4,  5,  6,  1  ],
+               [3,  4,  5,  6,  nil,nil],
+               [4,  5,  6,  2,  1,  3  ],
+               [4,  5,  6,  nil,2,  1  ],
+               [4,  5,  6,  nil,1,  2  ]]
+    board = Demisus::SudokuBoard.new(numbers, :region_size => [3,2])
+    number_in_column = {0 => [], 1 => [], 2 => [],
+                        3 => [], 4 => [], 5 => []}
+    column_counter = 0
+    board.each_column do |col|
+      col.each do |cell|
+        number_in_column[column_counter] << cell.number
+      end
+      column_counter += 1
+    end
+
+    assert_equal [1, 2, 3, 4, 4, 4], number_in_column[0]
+    assert_equal [2, 3, 4, 5, 5, 5], number_in_column[1]
+    assert_equal [3, 4, 5, 6, 6, 6], number_in_column[2]
+    assert_equal [4, 5, 6, 2, nil, nil], number_in_column[3]
+    assert_equal [5, 6, nil, 1, 2, 1], number_in_column[4]
+    assert_equal [6, 1, nil, 3, 1, 2], number_in_column[5]
   end
 end

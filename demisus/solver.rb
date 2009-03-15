@@ -7,6 +7,16 @@ module Demisus
 
     # Class methods ==========================================================
 
+    def self.rules(type=:all)
+      @rules ||= []
+      case type
+      when :all
+        @rules
+      else
+        @rules.find_all {|r| r[:type] == type}
+      end
+    end
+
     # Defines a new sudoku solving rule. The type must be one of:
     #
     # - :cell_group
@@ -17,7 +27,27 @@ module Demisus
     # receive an Array of SudokuCell objects comprising the cell_group or the
     # region currently being processed.
     def self.define_rule(type, name, description, &blk)
-      raise NotImplementedError
+      self.rules << {:type        => type,
+                     :name        => name,
+                     :description => description,
+                     :action      => blk}
+    end
+
+    define_rule(:cell_group,
+                "Final numbers remove candidates",
+                "Every final number in a row/column/region automatically
+                removes that number as candidate from the rest of the
+                row/column/region") do |cells, board|
+      solved, unsolved = cells.partition {|c| c.solved?}
+      final_numbers = solved.map {|c| c.number}
+      unsolved.each do |cell|
+        common = cell.candidates & final_numbers
+        if not common.empty?
+          common.each do |c|
+            board.remove_candidate(cell.i, cell.j, c)
+          end
+        end
+      end
     end
 
     # Instance methods =======================================================
@@ -28,12 +58,16 @@ module Demisus
       @board = SudokuBoard.new(numbers)
     end
 
+    def rules(type)
+      self.class.rules(type)
+    end
+
     # Checks that the board to solve is consistent (doesn't have repeated
     # numbers so it's potentially solvable)
     def consistent?
       ret = true
       # Check every row first
-      @board.cells.each do |row|
+      @board.each_row do |row|
         row_numbers = Set.new
         row.each do |cell|
           n = cell.number
@@ -44,10 +78,10 @@ module Demisus
         end
       end
       # Check every column
-      0.upto(@board.side_size-1) do |col|
+      @board.each_column do |col|
         col_numbers = Set.new
-        @board.cells.each do |row|
-          n = row[col].number
+        col.each do |cell|
+          n = cell.number
           if n and col_numbers.include? n
             ret = false
           end
@@ -70,10 +104,23 @@ module Demisus
       @board.unsolved_cells.size
     end
 
+    def execute_rule(rule, cell_group)
+      rule[:action].call(cell_group, @board)
+    end
+
     # Executes rules until the first change in the board (candidate removal or
     # number finding)
     def simplify!
-      raise NotImplementedError
+      @board.each_row do |row|
+        rules(:cell_group).each do |rule|
+          execute_rule(rule, row)
+        end
+      end
+      @board.each_column do |col|
+        rules(:cell_group).each do |rule|
+          execute_rule(rule, col)
+        end
+      end
     end
 
     # Solves the whole sudoku. Raises the exception UnsolvableSudoku if it

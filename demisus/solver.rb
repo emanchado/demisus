@@ -2,6 +2,8 @@ require 'set'
 require 'demisus/board'
 
 module Demisus
+  class UnsolvableSudokuError < StandardError; end
+
   class SudokuSolver
     attr_reader :board
 
@@ -169,12 +171,22 @@ module Demisus
       end
     end
 
-    # Solves the whole sudoku. Raises the exception UnsolvableSudoku if it
+    # Solves the whole sudoku. Raises the exception UnsolvableSudokuError if it
     # can't be solved with the currently defined rules, or
     # InconsistentSudokuError if the sudoku is found to be inconsistent and
-    # can't be solved at all
+    # can't be solved at all (has 0 solutions)
     def solve!
-      raise NotImplementedError
+      number_unsolved_cells_before = number_unsolved_cells
+      loop do
+        simplify!
+        unsolved = number_unsolved_cells
+        if unsolved >= number_unsolved_cells_before
+          raise UnsolvableSudokuError,
+                "Can't solve sudoku (#{unsolved} cells left to solve)"
+        end
+        number_unsolved_cells_before = unsolved
+        break if unsolved == 0
+      end
     end
   end
 end

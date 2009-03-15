@@ -17,4 +17,4 @@ puts "Unsolved cells: #{solver.number_unsolved_cells}"
 
 exporter = Demisus::HtmlExporter.new(solver.board)
 
-solver.simplify!
+solver.solve!

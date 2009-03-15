@@ -17,23 +17,30 @@ module Demisus
       end
     end
 
+    def self.rule_by_id(id)
+      @rules.find_all {|r| r[:id] == id}.first
+    end
+
     # Defines a new sudoku solving rule. The type must be one of:
     #
     # - :cell_group
     # - :region
     #
-    # The name is the name of the rule, description is a description of what it
-    # does, and the associated block is the code for the rule. The block will
-    # receive an Array of SudokuCell objects comprising the cell_group or the
-    # region currently being processed.
-    def self.define_rule(type, name, description, &blk)
+    # The id is a symbol representing the rule. The name is a short name for
+    # it, description is a description of what it does (say, a long sentence
+    # or short paragraph), and the associated block is the code for the rule.
+    # The block will receive an Array of SudokuCell objects comprising the
+    # cell_group or the region currently being processed.
+    def self.define_rule(type, id, name, description, &blk)
       self.rules << {:type        => type,
+                     :id          => id,
                      :name        => name,
                      :description => description,
                      :action      => blk}
     end
 
     define_rule(:cell_group,
+                :final_numbers,
                 "Final numbers remove candidates",
                 "Every final number in a row/column/region automatically
                 removes that number as candidate from the rest of the

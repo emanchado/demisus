@@ -58,6 +58,16 @@ module Demisus
       @columns.each &blk
     end
 
+    def each_region(&blk)
+      0.step(@side_size-1, @region_size[0]) do |i|
+        0.step(@side_size-1, @region_size[1]) do |j|
+          blk.call(@rows[i ... i+@region_size[0]].map {|row|
+            row[j ... j+@region_size[1]]
+          }.flatten)
+        end
+      end
+    end
+
     # Returns a Range with the possible candidates for the cells inside the
     # board
     def possible_candidates

@@ -88,11 +88,31 @@ class TestSudokuBoard < Test::Unit::TestCase
       column_counter += 1
     end
 
-    assert_equal [1, 2, 3, 4, 4, 4], number_in_column[0]
-    assert_equal [2, 3, 4, 5, 5, 5], number_in_column[1]
-    assert_equal [3, 4, 5, 6, 6, 6], number_in_column[2]
-    assert_equal [4, 5, 6, 2, nil, nil], number_in_column[3]
-    assert_equal [5, 6, nil, 1, 2, 1], number_in_column[4]
-    assert_equal [6, 1, nil, 3, 1, 2], number_in_column[5]
+    assert_equal [1, 2, 3,   4, 4,   4],   number_in_column[0]
+    assert_equal [2, 3, 4,   5, 5,   5],   number_in_column[1]
+    assert_equal [3, 4, 5,   6, 6,   6],   number_in_column[2]
+    assert_equal [4, 5, 6,   2, nil, nil], number_in_column[3]
+    assert_equal [5, 6, nil, 1, 2,   1],   number_in_column[4]
+    assert_equal [6, 1, nil, 3, 1,   2],   number_in_column[5]
+  end
+
+  def test_each_region
+    numbers = [[1,  2,  3,  4,  5,  6  ],
+               [2,  3,  4,  5,  6,  1  ],
+               [3,  4,  5,  6,  nil,nil],
+               [4,  5,  6,  2,  1,  3  ],
+               [4,  5,  6,  nil,2,  1  ],
+               [4,  5,  6,  nil,1,  2  ]]
+    board = Demisus::SudokuBoard.new(numbers, :region_size => [2,3])
+    actual_regions = []
+    board.each_region do |region|
+      actual_regions << region.map {|c| c.number}
+    end
+    assert_equal [1,   2,   3,   2,   3,   4], actual_regions[0]
+    assert_equal [4,   5,   6,   5,   6,   1], actual_regions[1]
+    assert_equal [3,   4,   5,   4,   5,   6], actual_regions[2]
+    assert_equal [6,   nil, nil, 2,   1,   3], actual_regions[3]
+    assert_equal [4,   5,   6,   4,   5,   6], actual_regions[4]
+    assert_equal [nil, 2,   1,   nil, 1,   2], actual_regions[5]
   end
 end

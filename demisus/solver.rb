@@ -180,7 +180,9 @@ module Demisus
     end
 
     def execute_rule(rule, cell_group)
+      $stderr.puts "Calling rule #{rule[:id]}"
       rule[:action].call(cell_group)
+      ensure_consistency!
     end
 
     # Executes rules until the first change in the board (candidate removal or

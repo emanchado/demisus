@@ -95,10 +95,11 @@ module Demisus
                 "A candidate is the solution for the only cell having it",
                 "A candidate that appears in a single cell inside a group must
                 be the solution for that cell") do |cells|
-      unsolved = cells.find_all {|c| not c.solved?}
-      # Collect, for each possible candidate, which cells consider it
+      # Collect, for each possible candidate, which cells consider it. Also
+      # count the final numbers, to avoid assigning already existing final
+      # numbers
       cells_for_candidate = {}
-      unsolved.each do |cell|
+      cells.each do |cell|
         cell.candidates.each do |cand|
           cells_for_candidate[cand] ||= []
           cells_for_candidate[cand] << cell

@@ -65,7 +65,7 @@ module Demisus
                 "A pair of cells having the same pair of candidates as only
                 possibilities discard those candidates from the rest of the
                 row/column/region") do |cells|
-      solved, unsolved = cells.partition {|c| c.solved?}
+      unsolved = cells.find_all {|c| not c.solved?}
       # First, look for a pair of cells having the same pair of candidates
       candidate_groups_found = {}
       unsolved.each do |cell|

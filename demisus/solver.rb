@@ -152,6 +152,17 @@ module Demisus
           col_numbers << n
         end
       end
+      # Check every region
+      @board.each_region do |reg|
+        reg_numbers = Set.new
+        reg.each do |cell|
+          n = cell.number
+          if n and reg_numbers.include? n
+            ret = false
+          end
+          reg_numbers << n
+        end
+      end
       return ret
     end
 

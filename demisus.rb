@@ -18,3 +18,4 @@ puts "Unsolved cells: #{solver.number_unsolved_cells}"
 exporter = Demisus::HtmlExporter.new(solver.board)
 
 solver.solve!
+solver.ensure_consistency!

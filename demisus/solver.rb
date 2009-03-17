@@ -71,7 +71,7 @@ module Demisus
       unsolved.each do |cell|
         cands = cell.candidates
         if cands.size == 2
-          key = cands.join("|")
+          key = cands.sort.join("|")
           candidate_groups_found[key] ||= []
           candidate_groups_found[key] << cell
         end

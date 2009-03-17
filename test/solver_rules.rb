@@ -35,7 +35,7 @@ class TestSudokuSolverRules < Test::Unit::TestCase
     # Artificially set the candidates for two of the cells
     cells[0].instance_variable_set("@candidates", [1,2])
     cells[1].instance_variable_set("@candidates", [2,5])
-    cells[2].instance_variable_set("@candidates", [1,2])
+    cells[2].instance_variable_set("@candidates", [2,1])
 
     execute_rule(:naked_pairs, cells)
 

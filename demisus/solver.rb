@@ -90,6 +90,29 @@ module Demisus
       end
     end
 
+    define_rule(:cell_group,
+                :single_place_candidate,
+                "A candidate is the solution for the only cell having it",
+                "A candidate that appears in a single cell inside a group must
+                be the solution for that cell") do |cells|
+      unsolved = cells.find_all {|c| not c.solved?}
+      # Collect, for each possible candidate, which cells consider it
+      cells_for_candidate = {}
+      unsolved.each do |cell|
+        cell.candidates.each do |cand|
+          cells_for_candidate[cand] ||= []
+          cells_for_candidate[cand] << cell
+        end
+      end
+      # Now, if some candidate has a single cell, set that candidate as
+      # solution for the cell
+      cells_for_candidate.each_pair do |cand, cells|
+        if cells.size == 1
+          cells.first.number = cand
+        end
+      end
+    end
+
     # Instance methods =======================================================
 
     # Creates a new solver object for the given board (a matrix of Integer

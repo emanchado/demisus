@@ -108,7 +108,7 @@ module Demisus
       # Now, if some candidate has a single cell, set that candidate as
       # solution for the cell
       cells_for_candidate.each_pair do |cand, cells|
-        if cells.size == 1
+        if cells.size == 1 and not cells.first.solved?
           cells.first.number = cand
         end
       end

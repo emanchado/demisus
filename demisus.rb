@@ -17,7 +17,7 @@ if not File.readable? sudoku_path
   die_in_error "Can't read file #{sudoku_path}"
 end
 puts "Solving #{sudoku_path}"
-numbers_consistent = Demisus::Importers.from_simple_file('sudoku-1-simple')
+numbers_consistent = Demisus::Importers.from_simple_file(sudoku_path)
 solver = Demisus::SudokuSolver.new(numbers_consistent)
 puts "Initially consistent? #{solver.consistent?}"
 puts "Number of unsolved cells: #{solver.number_unsolved_cells}"

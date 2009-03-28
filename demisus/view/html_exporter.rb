@@ -1,7 +1,7 @@
 require 'erb'
 require 'demisus/solver'
 
-module Demisus
+module Demisus::View
   class HtmlExporter
     def initialize(board)
       @board = board

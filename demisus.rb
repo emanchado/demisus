@@ -23,7 +23,7 @@ puts "Initially consistent? #{solver.consistent?}"
 puts "Number of unsolved cells: #{solver.number_unsolved_cells}"
 
 
-exporter = Demisus::HtmlExporter.new(solver.board)
+exporter = Demisus::View::HtmlExporter.new(solver.board)
 
 solver.solve!
 solver.ensure_consistency!

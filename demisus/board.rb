@@ -82,7 +82,11 @@ module Demisus
     # Returns the list of cells comprising the region containing the given
     # coordinates
     def region_for(i, j)
-      raise NotImplementedError
+      region_i = (i / @region_size[0]) * @region_size[0]
+      region_j = (j / @region_size[1]) * @region_size[1]
+      @rows[region_i ... region_i+@region_size[0]].map {|row|
+            row[region_j ... region_j+@region_size[1]]
+          }.flatten
     end
 
     # Defines a new listener for the given event. When the event occurs, the

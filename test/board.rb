@@ -115,4 +115,62 @@ class TestSudokuBoard < Test::Unit::TestCase
     assert_equal [4,   5,   6,   4,   5,   6], actual_regions[4]
     assert_equal [nil, 2,   1,   nil, 1,   2], actual_regions[5]
   end
+
+  def test_region_for
+    numbers = [[1,  2,  3,  4,  5,  6  ],
+               [2,  3,  4,  5,  6,  1  ],
+               [3,  4,  5,  6,  nil,nil],
+               [4,  5,  6,  2,  1,  3  ],
+               [4,  5,  6,  nil,2,  1  ],
+               [4,  5,  6,  nil,1,  2  ]]
+    board = Demisus::SudokuBoard.new(numbers, :region_size => [2,3])
+    regions = [[1,  2,  3,  2,  3,  4],
+               [4,  5,  6,  5,  6,  1],
+               [3,  4,  5,  4,  5,  6],
+               [6,  nil,nil,2,  1,  3],
+               [4,  5,  6,  4,  5,  6],
+               [nil,2,  1,  nil,1,  2]]
+
+    assert_equal regions[0], board.region_for(0,0).map {|c| c.number}
+    assert_equal regions[0], board.region_for(0,1).map {|c| c.number}
+    assert_equal regions[0], board.region_for(0,2).map {|c| c.number}
+    assert_equal regions[0], board.region_for(1,0).map {|c| c.number}
+    assert_equal regions[0], board.region_for(1,1).map {|c| c.number}
+    assert_equal regions[0], board.region_for(1,2).map {|c| c.number}
+
+    assert_equal regions[1], board.region_for(0,3).map {|c| c.number}
+    assert_equal regions[1], board.region_for(0,4).map {|c| c.number}
+    assert_equal regions[1], board.region_for(0,5).map {|c| c.number}
+    assert_equal regions[1], board.region_for(1,3).map {|c| c.number}
+    assert_equal regions[1], board.region_for(1,4).map {|c| c.number}
+    assert_equal regions[1], board.region_for(1,5).map {|c| c.number}
+
+    assert_equal regions[2], board.region_for(2,0).map {|c| c.number}
+    assert_equal regions[2], board.region_for(2,1).map {|c| c.number}
+    assert_equal regions[2], board.region_for(2,2).map {|c| c.number}
+    assert_equal regions[2], board.region_for(3,0).map {|c| c.number}
+    assert_equal regions[2], board.region_for(3,1).map {|c| c.number}
+    assert_equal regions[2], board.region_for(3,2).map {|c| c.number}
+
+    assert_equal regions[3], board.region_for(2,3).map {|c| c.number}
+    assert_equal regions[3], board.region_for(2,4).map {|c| c.number}
+    assert_equal regions[3], board.region_for(2,5).map {|c| c.number}
+    assert_equal regions[3], board.region_for(3,3).map {|c| c.number}
+    assert_equal regions[3], board.region_for(3,4).map {|c| c.number}
+    assert_equal regions[3], board.region_for(3,5).map {|c| c.number}
+
+    assert_equal regions[4], board.region_for(4,0).map {|c| c.number}
+    assert_equal regions[4], board.region_for(4,1).map {|c| c.number}
+    assert_equal regions[4], board.region_for(4,2).map {|c| c.number}
+    assert_equal regions[4], board.region_for(5,0).map {|c| c.number}
+    assert_equal regions[4], board.region_for(5,1).map {|c| c.number}
+    assert_equal regions[4], board.region_for(5,2).map {|c| c.number}
+
+    assert_equal regions[5], board.region_for(4,3).map {|c| c.number}
+    assert_equal regions[5], board.region_for(4,4).map {|c| c.number}
+    assert_equal regions[5], board.region_for(4,5).map {|c| c.number}
+    assert_equal regions[5], board.region_for(5,3).map {|c| c.number}
+    assert_equal regions[5], board.region_for(5,4).map {|c| c.number}
+    assert_equal regions[5], board.region_for(5,5).map {|c| c.number}
+  end
 end

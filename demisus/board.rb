@@ -52,6 +52,12 @@ module Demisus
       end
     end
 
+    def each_cell(&blk)
+      @rows.each do |row|
+        row.each &blk
+      end
+    end
+
     def each_row(&blk)
       @rows.each &blk
     end

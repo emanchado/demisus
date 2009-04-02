@@ -56,7 +56,25 @@ module Demisus
     # objects; nil for the unknown numbers)
     def initialize(numbers)
       @board = SudokuBoard.new(numbers)
+      @board.define_listener(:set_number) do |i,j,n|
+        remove_obvious_candidates(i, j, n)
+      end
+      @removed_first_obvious_candidates = false
       initialize_listeners
+    end
+
+    def remove_obvious_candidates(i, j, n)
+      # Remove obvious candidates every time we find a number
+      row, column, region = @board.rows[i],
+                            @board.columns[j],
+                            @board.region_for(i,j)
+      [row, column, region].each do |cells|
+        cells.reject {|c| c.solved?}.each do |cell|
+          if cell.candidates.include? n
+            cell.remove_candidate(n)
+          end
+        end
+      end
     end
 
     def rules(type)
@@ -126,6 +144,17 @@ module Demisus
     # Executes rules until the first change in the board (candidate removal or
     # number finding)
     def simplify!
+      # Ugly corner case: the first time we ever touch the board, it should be
+      # to remove the obvious candidates (after the already solved cells). The
+      # rest of the obvious candidates will only be removed on demand, every
+      # time we solve a cell (see the listener in the constructor)
+      unless @removed_first_obvious_candidates
+        @board.each_cell do |cell|
+          remove_obvious_candidates(cell.i, cell.j, cell.number)
+        end
+        @removed_first_obvious_candidates = true
+      end
+
       @board.each_row do |row|
         rules(:cell_group).each do |rule|
           execute_rule(rule, row)

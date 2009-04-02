@@ -3,24 +3,6 @@ require 'demisus/solver'
 ss = Demisus::SudokuSolver
 
 ss.define_rule(:cell_group,
-               :final_numbers,
-               "Final numbers remove candidates",
-               "Every final number in a row/column/region automatically
-               removes that number as candidate from the rest of the
-               row/column/region") do |cells|
-  solved, unsolved = cells.partition {|c| c.solved?}
-  final_numbers = solved.map {|c| c.number}
-  unsolved.each do |cell|
-    common = cell.candidates & final_numbers
-    if not common.empty?
-      common.each do |c|
-        cell.remove_candidate(c)
-      end
-    end
-  end
-end
-
-ss.define_rule(:cell_group,
                :naked_pairs,
                "Pair of cells with same candidates discard those for the rest",
                "A pair of cells having the same pair of candidates as only

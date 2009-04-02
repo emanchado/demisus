@@ -169,6 +169,9 @@ module Demisus
         rules(:cell_group).each do |rule|
           execute_rule(rule, region)
         end
+        rules(:region).each do |rule|
+          execute_rule(rule, region, board)
+        end
       end
     end
 

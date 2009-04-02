@@ -75,4 +75,63 @@ class TestSudokuSolverRules < Test::Unit::TestCase
     assert cells[3].solved?,
            "The fourth cell should stay solved"
   end
+
+  def test_candidate_in_single_row_or_column
+    require 'demisus/importers'
+    numbers = Demisus::Importers::from_simple_string(<<EOS)
+______
+______
+______
+______
+2_1___
+4_____
+EOS
+    board = Demisus::SudokuBoard.new(numbers, :region_size => [2, 3])
+
+    # Candidates for the bottom-left region
+    board.rows[4][1].instance_variable_set("@candidates", [5,3])
+    board.rows[5][1].instance_variable_set("@candidates", [5,6])
+    board.rows[5][2].instance_variable_set("@candidates", [3,6])
+    # Candidates for the 2nd column
+    board.rows[0][1].instance_variable_set("@candidates", [3,1])
+    board.rows[1][1].instance_variable_set("@candidates", [1,3,2])
+    board.rows[2][1].instance_variable_set("@candidates", [3,5])
+    board.rows[3][1].instance_variable_set("@candidates", [5,6,1])
+    # Candidates for the 6th row
+    board.rows[5][3].instance_variable_set("@candidates", [3,6,1])
+    board.rows[5][4].instance_variable_set("@candidates", [1,3])
+    board.rows[5][5].instance_variable_set("@candidates", [6,5])
+
+    # Execute the rule
+    execute_rule(:candidate_in_single_row_or_column,
+                 board.region_for(5,0),
+                 board)
+
+    # Check that the right candidates have been removed
+    # 1) 5 from 2nd column
+    assert !board.rows[0][1].candidates.include?(5)
+    assert !board.rows[1][1].candidates.include?(5)
+    assert !board.rows[2][1].candidates.include?(5)
+    assert !board.rows[3][1].candidates.include?(5)
+    # 2) 6 from 6th row
+    assert !board.rows[5][3].candidates.include?(6)
+    assert !board.rows[5][4].candidates.include?(6)
+    assert !board.rows[5][5].candidates.include?(6)
+
+    # Check that final numbers are correct
+    # 1) after removing 5 from 2nd column
+    assert board.rows[2][1].solved?
+    assert_equal 3, board.rows[2][1].number
+    # 2) after removing 6 from 6th row
+    assert board.rows[5][5].solved?
+    assert_equal 5, board.rows[5][5].number
+
+    # Check that the candidates haven't been removed from the region itself
+    # 1) 5 from 2nd column
+    assert(board.rows[4][1].candidates.include? 5)
+    assert(board.rows[5][1].candidates.include? 5)
+    # 2) 6 from 6th row
+    assert(board.rows[5][1].candidates.include? 6)
+    assert(board.rows[5][2].candidates.include? 6)
+  end
 end

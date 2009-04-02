@@ -56,3 +56,42 @@ ss.define_rule(:cell_group,
     end
   end
 end
+
+ss.define_rule(:region,
+               :candidate_in_single_row_or_column,
+               "Candidate in single row/column in region discards from rest",
+               "A candidate occurring in a single row/column inside a region
+               discards that candidate from the whole row/column") do |cells, board|
+  unsolved = cells.find_all {|c| not c.solved?}
+  # Collect, for each possible candidate, which rows/columns consider it
+  rows_for_candidate = {}
+  cols_for_candidate = {}
+  unsolved.each do |cell|
+    cell.candidates.each do |cand|
+      rows_for_candidate[cand] ||= Set.new
+      rows_for_candidate[cand] << cell.i
+      cols_for_candidate[cand] ||= Set.new
+      cols_for_candidate[cand] << cell.j
+    end
+  end
+  # Now, if some candidate has a single row or column, dicard that candidate
+  # from the whole row/column outside that region
+  rows_for_candidate.each_pair do |cand, rows_with_cand|
+    if rows_with_cand.size == 1
+      board.rows[rows_with_cand.first].each do |cell|
+        if cell.candidates.include? cand and not cells.include? cell
+          cell.remove_candidate cand
+        end
+      end
+    end
+  end
+  cols_for_candidate.each_pair do |cand, cols_with_cand|
+    if cols_with_cand.size == 1
+      board.columns[cols_with_cand.first].each do |cell|
+        if cell.candidates.include? cand and not cells.include? cell
+          cell.remove_candidate cand
+        end
+      end
+    end
+  end
+end

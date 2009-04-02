@@ -1,11 +1,17 @@
 require 'set'
 require 'demisus/board'
+require 'demisus/mixins/listeners'
 
 module Demisus
   class UnsolvableSudokuError < StandardError; end
 
   class SudokuSolver
     attr_reader :board
+
+    include Demisus::Mixins::Listeners
+
+    def event_types; [:before_applying_rule,
+                      :after_applying_rule]; end
 
     # Class methods ==========================================================
 
@@ -50,6 +56,7 @@ module Demisus
     # objects; nil for the unknown numbers)
     def initialize(numbers)
       @board = SudokuBoard.new(numbers)
+      initialize_listeners
     end
 
     def rules(type)
@@ -109,8 +116,10 @@ module Demisus
       @board.unsolved_cells.size
     end
 
-    def execute_rule(rule, cell_group)
-      rule[:action].call(cell_group)
+    def execute_rule(rule, *params)
+      call_listeners(:before_applying_rule, [rule])
+      rule[:action].call(*params)
+      call_listeners(:after_applying_rule, [rule])
       ensure_consistency!
     end
 

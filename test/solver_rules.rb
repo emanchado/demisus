@@ -4,8 +4,8 @@ require 'demisus/solver'
 require 'flexmock/test_unit'
 
 class TestSudokuSolverRules < Test::Unit::TestCase
-  def execute_rule(id, cells)
-    Demisus::SudokuSolver.rule_by_id(id)[:action].call(cells)
+  def execute_rule(id, *params)
+    Demisus::SudokuSolver.rule_by_id(id)[:action].call(*params)
   end
 
   def test_final_numbers

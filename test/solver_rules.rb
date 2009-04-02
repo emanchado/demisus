@@ -8,23 +8,6 @@ class TestSudokuSolverRules < Test::Unit::TestCase
     Demisus::SudokuSolver.rule_by_id(id)[:action].call(*params)
   end
 
-  def test_final_numbers
-    board_mock = flexmock("board")
-    board_mock.should_receive(:call_listeners).times(2).and_return(nil, nil)
-    board_mock.should_receive(:possible_candidates).times(2).and_return(1..2)
-    cells = [Demisus::SudokuCell.new(board_mock, 0, 0, 1),
-             Demisus::SudokuCell.new(board_mock, 0, 1, nil)]
-    assert cells[1].candidates.include?(1),
-           "Second cell should have '1' as candidate before any rules"
-
-    execute_rule(:final_numbers, cells)
-
-    assert !cells[1].candidates.include?(1),
-           "Second cell shouldn't have '1' as candidate after rules"
-    assert cells[1].candidates.include?(2),
-           "Second cell should have '2' as candidate after rules"
-  end
-
   def test_naked_pairs
     board_mock = flexmock("board")
     board_mock.should_receive(:call_listeners).times(2).and_return(nil)

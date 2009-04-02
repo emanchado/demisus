@@ -1,3 +1,5 @@
+require 'demisus/mixins/listeners'
+
 module Demisus
   class InvalidCandidateError < ArgumentError; end
   class UnknownEventError < ArgumentError; end
@@ -5,7 +7,9 @@ module Demisus
   class InvalidSudokuError < ArgumentError; end
 
   class SudokuBoard
-    EVENTS = [:set_number, :remove_candidate]
+    include Demisus::Mixins::Listeners
+
+    def event_types; [:set_number, :remove_candidate]; end
 
     # Array of SudokuCell
     attr_reader :rows
@@ -24,9 +28,7 @@ module Demisus
       @columns     = []
       @region_size = opts[:region_size]
       @side_size   = @region_size[0] * @region_size[1]
-      # List of listeners per every event
-      @listeners   = {}
-      EVENTS.each {|e| @listeners[e] = []}
+      initialize_listeners
 
       if board.size != @side_size
         raise InvalidSudokuError,
@@ -87,25 +89,6 @@ module Demisus
       @rows[region_i ... region_i+@region_size[0]].map {|row|
             row[region_j ... region_j+@region_size[1]]
           }.flatten
-    end
-
-    # Defines a new listener for the given event. When the event occurs, the
-    # given block will be called with appropriate parameters
-    def define_listener(event, &blk)
-      event_sym = event.to_sym
-      if EVENTS.include? event_sym
-        @listeners[event_sym] << blk
-      else
-        raise UnknownEventError, "Unknown event #{event}"
-      end
-    end
-
-    # Call the defined listeners for the given event, passing the given list of
-    # params
-    def call_listeners(event, params)
-      @listeners[event.to_sym].each do |blk|
-        blk.call(*params)
-      end
     end
   end
 
